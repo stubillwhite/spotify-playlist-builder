@@ -1,20 +1,16 @@
+import click
+import os
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
+from random import shuffle
 from spotipy.oauth2 import SpotifyOAuth
 
-from itertools import *
-from random import shuffle
-import os
-
-scope = 'playlist-modify-public'
-
-spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, redirect_uri='http://localhost:8080'))
+PLAYLIST_DIR = 'playlists'
+PLAYLIST_NAME = 'generated-playlist'
 
 
 class Track:
 
-    def __init__(this, url, submitter):
-
+    def __init__(this, spotify, url, submitter):
         track = spotify.track(url)
 
         this.submitter = submitter
@@ -31,38 +27,60 @@ def read_lines(path):
     return [l.strip() for l in lines]
 
 
-def read_tracks(path):
+def read_tracks(spotify, path):
     submitter = os.path.basename(path)
-    return [Track(url, submitter) for url in read_lines(path)]
+    return [Track(spotify, url, submitter) for url in read_lines(path)]
 
 
 def flatten(coll):
     return [x for xs in coll for x in xs]
 
 
-playlist_dir = 'playlists'
+def build_spotify_client():
+    scope = 'playlist-modify-public'
+    return spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, redirect_uri='http://localhost:8080'))
 
-submission_files = [os.path.join(playlist_dir, os.fsdecode(f)) for f in os.listdir(playlist_dir)]
 
-tracks = flatten([read_tracks(path) for path in submission_files])
+def compile_track_list(spotify):
+    submission_files = [os.path.join(PLAYLIST_DIR, os.fsdecode(f)) for f in os.listdir(PLAYLIST_DIR)]
+    tracks = flatten([read_tracks(spotify, path) for path in submission_files])
+    shuffle(tracks)
+    return tracks
 
-shuffle(tracks)
 
-for t in tracks:
-    
-    print(t.submitter)
-    print(t.id)
-    print(t.url)
-    print(t.track_name)
-    print(t.artists)
+def display_track_list(show_submitter, tracks):
+    if show_submitter:
+        fmt_track = lambda t: f'{t.url}\t{t.artists}\t{t.track_name}\t{t.submitter}'
+    else:
+        fmt_track = lambda t: f'{t.url}\t{t.artists}\t{t.track_name}'
 
-    print('------')
+    for t in tracks:
+        print(fmt_track(t))
 
-user_id = spotify.current_user()['id']
 
-playlist = spotify.user_playlist_create(user=user_id, name='Test playlist')
-playlist_id = playlist['id']
+def generate_spotify_playlist(spotify, tracks):
+    user_id = spotify.current_user()['id']
 
-track_ids = [t.id for t in tracks]
+    playlist = spotify.user_playlist_create(user=user_id, name=PLAYLIST_NAME)
+    playlist_id = playlist['id']
 
-spotify.user_playlist_add_tracks(user=user_id, playlist_id=playlist_id, tracks=track_ids)
+    track_ids = [t.id for t in tracks]
+
+    spotify.user_playlist_add_tracks(user=user_id, playlist_id=playlist_id, tracks=track_ids)
+
+
+@click.command()
+@click.option('--upload', is_flag=True, help='Upload the playlist to Spotify')
+@click.option('--show-submitter', is_flag=True, help='Display who submitted the track')
+def build_playlist(upload, show_submitter):
+    spotify = build_spotify_client()
+
+    tracks = compile_track_list(spotify)
+    display_track_list(show_submitter, tracks)
+
+    if upload:
+        generate_spotify_playlist(spotify, tracks)
+
+
+if __name__ == '__main__':
+    build_playlist()

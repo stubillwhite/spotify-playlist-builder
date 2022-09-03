@@ -1,4 +1,5 @@
 .cache
+.idea
 bin
 lib
 playlists

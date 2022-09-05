@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ZSCALER_CERT_FILE=/Users/white1/Downloads/ZscalerRootCerts/ZscalerRootCertificate-2048-SHA256.crt
+ZSCALER_CERT_FILE=/Users/white1/Dev/certificates/ZscalerRootCertificate-2048-SHA256.crt
 
 MARKER_STRING="zscaler-certificate"
 

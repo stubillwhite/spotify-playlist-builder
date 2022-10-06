@@ -1,2 +1,4 @@
 spotipy
 click
+pandas
+openpyxl

@@ -2,3 +2,4 @@ spotipy
 click
 pandas
 openpyxl
+scikit-learn

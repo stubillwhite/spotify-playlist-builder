@@ -1,6 +1,7 @@
 from openpyxl.utils import get_column_letter, column_index_from_string
 
 import openpyxl
+import os
 import pandas as pd
 import re
 
@@ -35,6 +36,13 @@ def values_from_range(sheet, cell_range):
 # Main
 ########################################
 
+FILENAME = 'recs-summer-playlist-quiz-master.xlsx'
+ANSWERS  = 'B4:E55'
+GUESSES  = 'F4:P55'
+LIKES    = 'R4:AB55'
+DISLIKES = 'AD4:AN55'
+
+FILENAME = 'recs-roadtrip-playlist-quiz-master.xlsx'
 ANSWERS  = 'B3:E56'
 GUESSES  = 'F3:Q56'
 LIKES    = 'S3:AD56'
@@ -42,7 +50,7 @@ DISLIKES = 'AF3:AQ56'
 
 if __name__=='__main__':
 
-    dataframe = openpyxl.load_workbook('recs-roadtrip-playlist-quiz-master.xlsx')
+    dataframe = openpyxl.load_workbook(FILENAME)
     sheet = dataframe.active
 
     answers = values_from_range(sheet, ANSWERS)
@@ -70,6 +78,8 @@ if __name__=='__main__':
 
     df = pd.DataFrame(tbl, columns = header)
     print(df.to_string())
-    df.to_csv('results.csv', index=False)
+
+    output_fnam = os.path.splitext(FILENAME)[0] + '.csv'
+    df.to_csv(output_fnam, index=False)
 
 

@@ -14,8 +14,8 @@ Tiny script to take our team's submitted tracks and generate a playlist on Spoti
 
 - Run the script
     - Set the Spotify client keys to the development keys from your account
-        - `export SPOTIPY_CLIENT_ID="${SECRET_SPOTIFY_CLIENT_ID}"`
-        - `export SPOTIPY_CLIENT_SECRET="${SECRET_SPOTIFY_CLIENT_SECRET}"`
+        - `export SPOTIPY_CLIENT_ID="MY_SPOTIFY_CLIENT_ID"`
+        - `export SPOTIPY_CLIENT_SECRET="MY_SPOTIFY_CLIENT_SECRET"`
     - `python build_playlist.py --upload`
     - The playlist will be created under the name `generated-playlist` in your Spotify account
 
